@@ -1,1 +1,58 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Audio Studio PRO</title><link rel="stylesheet" href="assets/css/style.css"></head><body><header><h1>Audio Studio PRO</h1><p>AI Voice Lab & Audio Editor</p></header><main><nav><a href="index.html">Home</a><a href="voice-changer.html">Voice Changer</a><a href="voice-cloning.html">Voice Cloning</a><a href="audio-editor.html">Audio Editor</a><a href="my-projects.html">Projects</a><a href="settings.html">Settings</a></nav><section class="panel"><h2>স্বাগতম</h2><p>অডিও আপলোড বা রেকর্ড করে এডিট করুন। AI API সংযোগ পরে যোগ করা যাবে।</p><input id="audioFile" type="file" accept="audio/*"><audio id="player" controls></audio><p><a class="btn" href="audio-editor.html">অডিও এডিটর খুলুন</a></p></section></main><script src="assets/js/app.js"></script></body></html>
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audio Studio PRO</title>
+
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+</head>
+
+<body>
+
+  <header>
+    <h1>Audio Studio PRO</h1>
+    <p>AI Voice Lab & Audio Editor</p>
+  </header>
+
+  <main>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="voice-changer.html">Voice Changer</a>
+      <a href="voice-cloning.html">Voice Cloning</a>
+      <a href="audio-editor.html">Audio Editor</a>
+      <a href="my-projects.html">Projects</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+
+    <section class="panel">
+      <h2>স্বাগতম</h2>
+      <p>
+        অডিও আপলোড বা রেকর্ড করে এডিট করুন।
+        AI API সংযোগ পরে যোগ করা যাবে।
+      </p>
+
+      <input id="audioFile" type="file" accept="audio/*">
+      <audio id="player" controls></audio>
+
+      <p>
+        <a class="btn" href="audio-editor.html">
+          অডিও এডিটর খুলুন
+        </a>
+      </p>
+    </section>
+  </main>
+
+  <!-- Firebase configuration পরে আসল তথ্য দিয়ে যুক্ত হবে -->
+
+  <script src="assets/js/app.js"></script>
+
+</body>
+</html>
