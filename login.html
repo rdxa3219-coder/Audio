@@ -4,9 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1565c0">
   <title>Login - Audio Studio PRO</title>
 
-  <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <!-- Firebase Configuration -->
+  <script src="firebase/firebase-config.js"></script>
 
   <style>
     * {
@@ -16,19 +24,19 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background: #f1f5ff;
+      padding: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      background: #f1f5ff;
+      font-family: Arial, sans-serif;
     }
 
     .auth-card {
       width: 100%;
       max-width: 420px;
-      background: #fff;
       padding: 30px 24px;
+      background: #fff;
       border-radius: 18px;
       box-shadow: 0 10px 35px rgba(21, 101, 192, .12);
     }
@@ -40,13 +48,12 @@
 
     .logo h1 {
       color: #1565c0;
+      font-size: 25px;
       margin: 0 0 8px;
-      font-size: 27px;
     }
 
     .logo p {
       color: #667085;
-      margin: 0;
       font-size: 14px;
     }
 
@@ -58,8 +65,8 @@
 
     .tabs button {
       flex: 1;
-      border: 0;
       padding: 12px;
+      border: 0;
       border-radius: 9px;
       background: #edf2fa;
       color: #475467;
@@ -79,9 +86,9 @@
     .field label {
       display: block;
       margin-bottom: 7px;
+      color: #344054;
       font-size: 14px;
       font-weight: bold;
-      color: #344054;
     }
 
     .field input {
@@ -89,8 +96,8 @@
       padding: 13px;
       border: 1px solid #d0d5dd;
       border-radius: 9px;
-      outline: none;
       font-size: 15px;
+      outline: none;
     }
 
     .field input:focus {
@@ -101,14 +108,13 @@
     .main-btn {
       width: 100%;
       padding: 14px;
-      border: none;
+      border: 0;
       border-radius: 9px;
       background: #1565c0;
       color: white;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 5px;
     }
 
     .main-btn:disabled {
@@ -119,7 +125,7 @@
     .forgot {
       display: block;
       text-align: right;
-      margin: 0 0 15px;
+      margin-bottom: 16px;
       color: #1565c0;
       font-size: 13px;
       cursor: pointer;
@@ -129,7 +135,7 @@
       display: none;
       padding: 12px;
       border-radius: 8px;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
       font-size: 13px;
       line-height: 1.5;
       overflow-wrap: anywhere;
@@ -147,27 +153,24 @@
       background: #ecfdf3;
     }
 
-    .small-text {
-      text-align: center;
-      color: #667085;
-      font-size: 12px;
-      margin-top: 22px;
-      line-height: 1.6;
+    .message.info {
+      display: block;
+      color: #175cd3;
+      background: #eff8ff;
     }
 
     .hidden {
-      display: none;
+      display: none !important;
+    }
+
+    .footer {
+      margin-top: 22px;
+      text-align: center;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.6;
     }
   </style>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
-  <!-- Firebase Configuration -->
-  <script src="firebase/firebase-config.js"></script>
 </head>
 
 <body>
@@ -237,18 +240,21 @@
 
     </form>
 
-    <p class="small-text">
-      By continuing, you agree to use Audio Studio PRO responsibly.
+    <div class="footer">
+      Your account is protected by Firebase Authentication.
       <br>
-      Your password is handled by Firebase Authentication.
-    </p>
+      Audio Studio PRO
+    </div>
 
   </main>
 
   <script>
-    const authForm = document.getElementById("authForm");
+  (function () {
+    "use strict";
+
     const loginTab = document.getElementById("loginTab");
     const registerTab = document.getElementById("registerTab");
+    const authForm = document.getElementById("authForm");
     const submitBtn = document.getElementById("submitBtn");
     const forgotBtn = document.getElementById("forgotBtn");
     const confirmField = document.getElementById("confirmField");
@@ -259,10 +265,21 @@
     const confirmInput = document.getElementById("confirmPassword");
 
     let currentMode = "login";
-    let auth;
+    let busy = false;
 
-    function showMessage(message, type = "error") {
-      messageBox.textContent = message;
+    function getAuth() {
+      if (!window.firebaseServices ||
+          !window.firebaseServices.auth) {
+        throw new Error(
+          "Firebase চালু হয়নি। firebase-config.js এবং Firebase SDK পরীক্ষা করো।"
+        );
+      }
+
+      return window.firebaseServices.auth;
+    }
+
+    function showMessage(text, type) {
+      messageBox.textContent = text;
       messageBox.className = "message " + type;
     }
 
@@ -271,10 +288,13 @@
       messageBox.className = "message";
     }
 
-    function setLoading(loading) {
-      submitBtn.disabled = loading;
+    function setLoading(value) {
+      busy = value;
+      submitBtn.disabled = value;
+      loginTab.disabled = value;
+      registerTab.disabled = value;
 
-      if (loading) {
+      if (value) {
         submitBtn.textContent = "Please wait...";
       } else {
         submitBtn.textContent =
@@ -283,6 +303,8 @@
     }
 
     function setMode(mode) {
+      if (busy) return;
+
       currentMode = mode;
       clearMessage();
 
@@ -294,76 +316,88 @@
       confirmField.classList.toggle("hidden", isLogin);
       forgotBtn.classList.toggle("hidden", !isLogin);
 
+      confirmInput.required = !isLogin;
+
       passwordInput.autocomplete =
         isLogin ? "current-password" : "new-password";
-
-      confirmInput.required = !isLogin;
 
       submitBtn.textContent =
         isLogin ? "Login" : "Create Account";
     }
 
-    loginTab.addEventListener("click", () => {
+    loginTab.addEventListener("click", function () {
       setMode("login");
     });
 
-    registerTab.addEventListener("click", () => {
+    registerTab.addEventListener("click", function () {
       setMode("register");
     });
 
-    function getFirebaseAuth() {
-      if (!window.firebaseServices ||
-          !window.firebaseServices.auth) {
-        throw new Error(
-          "Firebase configuration পাওয়া যাচ্ছে না। firebase/firebase-config.js পরীক্ষা করো।"
-        );
-      }
-
-      return window.firebaseServices.auth;
-    }
-
-    function getFriendlyError(error) {
-      const code = error.code || "";
-
+    function friendlyError(error) {
       const errors = {
-        "auth/invalid-email": "সঠিক Email Address দাও।",
-        "auth/user-not-found": "এই Email দিয়ে কোনো Account পাওয়া যায়নি।",
-        "auth/wrong-password": "Password সঠিক নয়।",
-        "auth/invalid-credential": "Email অথবা Password সঠিক নয়।",
-        "auth/email-already-in-use": "এই Email দিয়ে Account আগে থেকেই আছে।",
-        "auth/weak-password": "Password কমপক্ষে ৬ অক্ষরের হতে হবে।",
-        "auth/too-many-requests": "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করো।",
-        "auth/network-request-failed": "Internet Connection পরীক্ষা করো।",
-        "auth/operation-not-allowed": "Firebase Console-এ Email/Password Sign-in চালু করো।",
-        "auth/unauthorized-domain": "Firebase Authentication-এর Authorized Domains পরীক্ষা করো।"
+        "auth/invalid-email":
+          "Email Address সঠিক নয়।",
+
+        "auth/user-not-found":
+          "এই Email দিয়ে কোনো Account পাওয়া যায়নি।",
+
+        "auth/wrong-password":
+          "Password সঠিক নয়।",
+
+        "auth/invalid-credential":
+          "Email অথবা Password সঠিক নয়।",
+
+        "auth/email-already-in-use":
+          "এই Email দিয়ে Account আগে থেকেই আছে।",
+
+        "auth/weak-password":
+          "Password কমপক্ষে ৬ অক্ষরের হতে হবে।",
+
+        "auth/too-many-requests":
+          "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করো।",
+
+        "auth/network-request-failed":
+          "Internet Connection পরীক্ষা করো।",
+
+        "auth/operation-not-allowed":
+          "Firebase Console-এ Email/Password Sign-in চালু করো।",
+
+        "auth/unauthorized-domain":
+          "Firebase Authentication-এর Authorized Domains পরীক্ষা করো।"
       };
 
-      return errors[code] ||
+      return errors[error.code] ||
         error.message ||
-        "কাজটি সম্পন্ন হয়নি। আবার চেষ্টা করো।";
+        "সমস্যা হয়েছে। আবার চেষ্টা করো।";
     }
 
-    authForm.addEventListener("submit", async function(event) {
+    authForm.addEventListener("submit", async function (event) {
       event.preventDefault();
+
+      if (busy) return;
+
       clearMessage();
 
       const email = emailInput.value.trim();
       const password = passwordInput.value;
 
       if (!email || !password) {
-        showMessage("Email এবং Password পূরণ করো।");
+        showMessage("Email এবং Password পূরণ করো।", "error");
         return;
       }
 
       if (password.length < 6) {
-        showMessage("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");
+        showMessage(
+          "Password কমপক্ষে ৬ অক্ষরের হতে হবে।",
+          "error"
+        );
         return;
       }
 
       setLoading(true);
 
       try {
-        auth = getFirebaseAuth();
+        const loginAuth = getAuth();
 
         if (currentMode === "register") {
           const confirmPassword = confirmInput.value;
@@ -373,30 +407,47 @@
           }
 
           const result =
-            await auth.createUserWithEmailAndPassword(
+            await loginAuth.createUserWithEmailAndPassword(
               email,
               password
             );
 
+          let verificationMessage =
+            "Account সফলভাবে তৈরি হয়েছে।";
+
           try {
             await result.user.sendEmailVerification();
+
+            verificationMessage +=
+              " Verification Link Email-এ পাঠানো হয়েছে।";
+
           } catch (verificationError) {
             console.error(
               "Verification email error:",
               verificationError
             );
+
+            verificationMessage +=
+              " তবে Verification Email পাঠানো যায়নি।";
           }
 
+          // নতুন Account তৈরি হওয়ার পর Session বন্ধ করা
+          await loginAuth.signOut();
+
+          setMode("login");
+
+          passwordInput.value = "";
+          confirmInput.value = "";
+
           showMessage(
-            "Account তৈরি হয়েছে। Email Verification Link পাঠানোর চেষ্টা করা হয়েছে। Dashboard-এ নেওয়া হচ্ছে...",
+            verificationMessage +
+            " এখন একই Email ও Password দিয়ে Login করো।",
             "success"
           );
 
-          window.location.replace("dashboard.html");
-
         } else {
           const result =
-            await auth.signInWithEmailAndPassword(
+            await loginAuth.signInWithEmailAndPassword(
               email,
               password
             );
@@ -412,28 +463,41 @@
         }
 
       } catch (error) {
-        showMessage(getFriendlyError(error));
+        console.error("Authentication error:", error);
+
+        showMessage(
+          friendlyError(error),
+          "error"
+        );
+
+      } finally {
         setLoading(false);
       }
     });
 
-    forgotBtn.addEventListener("click", async function() {
+    forgotBtn.addEventListener("click", async function () {
+      if (busy) return;
+
       clearMessage();
 
       const email = emailInput.value.trim();
 
       if (!email) {
         showMessage(
-          "Password Reset Link পাঠাতে প্রথমে Email Address দাও।"
+          "Password Reset Link পাঠাতে Email Address দাও।",
+          "error"
         );
+
         emailInput.focus();
         return;
       }
 
-      try {
-        auth = getFirebaseAuth();
+      setLoading(true);
 
-        await auth.sendPasswordResetEmail(email);
+      try {
+        const loginAuth = getAuth();
+
+        await loginAuth.sendPasswordResetEmail(email);
 
         showMessage(
           "Password Reset Link তোমার Email-এ পাঠানো হয়েছে।",
@@ -441,23 +505,37 @@
         );
 
       } catch (error) {
-        showMessage(getFriendlyError(error));
+        console.error("Password reset error:", error);
+
+        showMessage(
+          friendlyError(error),
+          "error"
+        );
+
+      } finally {
+        setLoading(false);
       }
     });
 
-    // Check existing Firebase login session
+    // Firebase connection check
     try {
-      auth = getFirebaseAuth();
+      getAuth();
 
-      auth.onAuthStateChanged(function(user) {
-        if (user) {
-          window.location.replace("dashboard.html");
-        }
-      });
+      showMessage(
+        "Firebase সংযোগ পাওয়া গেছে। Login অথবা Register করতে পারো।",
+        "success"
+      );
 
     } catch (error) {
-      showMessage(error.message);
+      console.error("Firebase initialization error:", error);
+
+      showMessage(
+        error.message,
+        "error"
+      );
     }
+
+  })();
   </script>
 
 </body>
