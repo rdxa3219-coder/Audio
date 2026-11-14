@@ -1,1 +1,108 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login - Audio Studio PRO</title><link rel="stylesheet" href="assets/css/style.css"></head><body><main class="panel"><h1>Login / Sign up</h1><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password"><button onclick="alert('Firebase config যোগ করার পর Authentication চালু হবে।')">Continue</button><p><a href="index.html">Home</a></p></main></body></html>
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Audio Studio PRO</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <main class="panel">
+    <h1>Audio Studio PRO</h1>
+    <h2>লগইন / রেজিস্ট্রেশন</h2>
+
+    <form id="authForm">
+      <label for="email">ইমেইল</label>
+      <input id="email" type="email" placeholder="তোমার ইমেইল" required>
+
+      <label for="password">পাসওয়ার্ড</label>
+      <input id="password" type="password" placeholder="পাসওয়ার্ড" minlength="6" required>
+
+      <button type="submit" id="loginBtn">লগইন</button>
+      <button type="button" id="registerBtn">নতুন অ্যাকাউন্ট তৈরি</button>
+    </form>
+
+    <p id="message" role="status"></p>
+    <p><a href="index.html">হোম পেজে ফিরে যাও</a></p>
+  </main>
+
+  <script>
+    const message = document.getElementById("message");
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+
+    // Firebase config এখনো বসানো হয়নি।
+    // আসল Firebase configuration যোগ করার পর Auth চালু হবে।
+    const firebaseReady =
+      typeof firebase !== "undefined" &&
+      firebase.apps.length > 0;
+
+    function showMessage(text) {
+      message.textContent = text;
+    }
+
+    function getCredentials() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        showMessage("ইমেইল ও পাসওয়ার্ড লিখুন।");
+        return null;
+      }
+
+      return { email, password };
+    }
+
+    loginBtn.addEventListener("click", async function(event) {
+      event.preventDefault();
+
+      const data = getCredentials();
+      if (!data) return;
+
+      if (!firebaseReady) {
+        showMessage("Firebase configuration এখনো যুক্ত করা হয়নি।");
+        return;
+      }
+
+      try {
+        await firebase.auth().signInWithEmailAndPassword(
+          data.email,
+          data.password
+        );
+
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        showMessage(error.message);
+      }
+    });
+
+    registerBtn.addEventListener("click", async function() {
+      const data = getCredentials();
+      if (!data) return;
+
+      if (!firebaseReady) {
+        showMessage("Firebase configuration এখনো যুক্ত করা হয়নি।");
+        return;
+      }
+
+      try {
+        await firebase.auth().createUserWithEmailAndPassword(
+          data.email,
+          data.password
+        );
+
+        showMessage("অ্যাকাউন্ট তৈরি হয়েছে!");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        showMessage(error.message);
+      }
+    });
+  </script>
+
+</body>
+</html>
