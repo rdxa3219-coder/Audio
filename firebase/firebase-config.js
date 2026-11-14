@@ -22,11 +22,11 @@ const auth = firebase.auth();
 const database = firebase.database();
 const storage = firebase.storage();
 
-// Make services available to other scripts
+// Make services available globally
 window.firebaseServices = {
-  auth: auth,
-  database: database,
-  storage: storage
+  auth,
+  database,
+  storage
 };
 
-console.log("Audio Studio PRO Firebase initialized");
+console.log("Audio Studio PRO Firebase initialized successfully");
