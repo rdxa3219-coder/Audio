@@ -1,4 +1,3 @@
-
 // Audio Studio PRO - Firebase Configuration
 
 const firebaseConfig = {
