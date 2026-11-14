@@ -1,13 +1,14 @@
+
 // Audio Studio PRO - Firebase Configuration
 
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_FIREBASE_APP_ID"
+  apiKey: "AIzaSyBqF8stLK8CHFf9kOQ00ioKECwWv-0tfAc",
+  authDomain: "audio-2fa4a.firebaseapp.com",
+  projectId: "audio-2fa4a",
+  storageBucket: "audio-2fa4a.firebasestorage.app",
+  messagingSenderId: "82355342967",
+  appId: "1:82355342967:web:90f097429d7ebce222c072",
+  measurementId: "G-YSZBH4YQKJ"
 };
 
 // Initialize Firebase
@@ -15,14 +16,17 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// Firebase services
+// Firebase Authentication
 const auth = firebase.auth();
-const database = firebase.database();
+
+// Firebase Storage
 const storage = firebase.storage();
 
-// Export services for other scripts
+// Realtime Database will be initialized
+// after adding the databaseURL from Firebase Console.
+
 window.firebaseServices = {
   auth,
-  database,
-  storage
+  storage,
+  database: null
 };
